@@ -70,9 +70,133 @@ la ocupacion.
 - RNF6. Cada clase y cada metodo tiene un comentario corto que explica que hace.
 - RNF7. El codigo se maneja con Git y se publica en GitHub, con un commit por cada avance.
 
+## Diagrama de clases UML
+
+```mermaid
+classDiagram
+    class Pelicula {
+        -String titulo
+        -String genero
+        -int duracionMinutos
+        -int edadMinima
+        +Pelicula(String, String, int, int)
+        +getTitulo() String
+        +getGenero() String
+        +getDuracionMinutos() int
+        +getEdadMinima() int
+        +ficha() String
+    }
+    class Silla {
+        -String codigo
+        -int fila
+        -int columna
+        -boolean ocupada
+        -double precioBase
+        +Silla(String, int, int, double)
+        +getCodigo() String
+        +getFila() int
+        +getColumna() int
+        +getPrecioBase() double
+        +estaOcupada() boolean
+        +ocupar() boolean
+        +liberar() boolean
+        +getTipo() String
+        +calcularPrecio() double
+    }
+    class SillaVip {
+        +SillaVip(String, int, int, double)
+        +getTipo() String
+        +calcularPrecio() double
+    }
+    class Funcion {
+        +int FILAS$
+        +int COLUMNAS$
+        -Pelicula pelicula
+        -int horario
+        -Silla[][] sillas
+        +Funcion(Pelicula, int, double)
+        +getPelicula() Pelicula
+        +getHorario() int
+        +horarioTexto() String
+        +getSilla(int, int) Silla
+        +buscarSilla(String) Silla
+        +contarLibres(String) int
+        +contarOcupadas() int
+        +porcentajeOcupacion() double
+        +ficha() String
+    }
+    class Cliente {
+        -String nombre
+        -String documento
+        +Cliente(String, String)
+        +getNombre() String
+        +getDocumento() String
+        +ficha() String
+    }
+    class Boleto {
+        -int numero
+        -Cliente cliente
+        -Funcion funcion
+        -Silla silla
+        -double valor
+        -boolean activo
+        +Boleto(int, Cliente, Funcion, Silla, double)
+        +getNumero() int
+        +getCliente() Cliente
+        +getFuncion() Funcion
+        +getSilla() Silla
+        +getValor() double
+        +estaActivo() boolean
+        +cancelar() boolean
+        +estadoTexto() String
+        +ficha() String
+    }
+    class Cine {
+        +double PRECIO_BASE$
+        -String nombre
+        -Funcion[] funciones
+        -int cantidadFunciones
+        -Boleto[] boletos
+        -int cantidadBoletos
+        -int siguienteNumero
+        +Cine(String)
+        +buscarFuncion(int) Funcion
+        +horarioValido(int) boolean
+        +agregarFuncion(Pelicula, int) String
+        +contarBoletosActivos(Funcion) int
+        +quitarFuncion(int) String
+        +venderBoleto(int, String, String, String) String
+        +buscarBoleto(int) Boleto
+        +cancelarBoleto(int) String
+        +buscarPorDocumento(String) Boleto[]
+        +totalRecaudado() double
+        +ordenarPorValor() Boleto[]
+    }
+
+    Silla <|-- SillaVip : herencia
+    Cine "1" o-- "0..5" Funcion : cartelera
+    Cine "1" o-- "0..100" Boleto : vendidas
+    Funcion "1" *-- "24" Silla : composicion
+    Funcion "0..*" --> "1" Pelicula : proyecta
+    Boleto "0..*" --> "1" Cliente : comprador
+    Boleto "0..*" --> "1" Funcion
+    Boleto "0..1" --> "1" Silla
+```
+
+### Relaciones
+
+- Herencia: SillaVip hereda de Silla. Usa el mismo constructor con super y sobrescribe
+  getTipo() y calcularPrecio() para cobrar el recargo del 30%.
+- Composicion (Funcion con Silla): cada funcion crea sus 24 sillas en su constructor. Si la
+  funcion se quita de la cartelera, sus sillas desaparecen con ella.
+- Agregacion (Cine con Funcion y Boleto): el cine guarda las funciones y las boletas en
+  arreglos de tamano fijo (5 y 100) con su contador.
+- Asociacion: una funcion proyecta una pelicula, y cada boleto conoce a su cliente, su
+  funcion y su silla.
+
 ## Avance por semanas
 
 - [x] Semana 1. Propuesta: enunciado, reglas del negocio y requisitos.
-- [ ] Semana 2. Diseno: diagrama de clases UML y clases del modelo.
+- [x] Semana 2. Diseno: diagrama de clases UML y clases del modelo.
 - [ ] Semana 3. Funcionalidad: requisitos funcionando con sus validaciones.
 - [ ] Semana 4. Cierre: interfaz grafica, pruebas, documento y sustentacion.

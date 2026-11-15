@@ -67,6 +67,18 @@ public class Cine {
         if (pelicula == null || pelicula.getTitulo() == null || pelicula.getTitulo().trim().isEmpty()) {
             return "Error: la pelicula debe tener titulo.";
         }
+        if (pelicula.getGenero() == null || pelicula.getGenero().trim().isEmpty()) {
+            return "Error: la pelicula debe tener genero.";
+        }
+        if (pelicula.getTitulo().contains(";") || pelicula.getGenero().contains(";")) {
+            return "Error: el titulo y el genero no pueden tener el signo ;";
+        }
+        if (pelicula.getDuracionMinutos() <= 0) {
+            return "Error: la duracion debe ser mayor que 0 minutos.";
+        }
+        if (pelicula.getEdadMinima() < 0 || pelicula.getEdadMinima() > 18) {
+            return "Error: la edad minima debe estar entre 0 y 18.";
+        }
         if (!horarioValido(horario)) {
             return "Error: el horario " + horario + " no es una hora valida.";
         }
@@ -140,6 +152,9 @@ public class Cine {
         if (documento == null || documento.trim().isEmpty()) {
             return "Error: falta el documento del cliente.";
         }
+        if (nombreCliente.contains(";") || documento.contains(";")) {
+            return "Error: el nombre y el documento no pueden tener el signo ;";
+        }
 
         silla.ocupar();
         Cliente cliente = new Cliente(nombreCliente.trim(), documento.trim());
@@ -158,6 +173,50 @@ public class Cine {
             }
         }
         return null;
+    }
+
+    // Busca la boleta activa de una silla en una funcion, sirve para saber quien la reservo
+    public Boleto buscarBoletoActivo(Funcion funcion, Silla silla) {
+        for (int i = 0; i < cantidadBoletos; i++) {
+            if (boletos[i].getFuncion() == funcion && boletos[i].getSilla() == silla && boletos[i].estaActivo()) {
+                return boletos[i];
+            }
+        }
+        return null;
+    }
+
+    // Registra una boleta leida del archivo con su numero y su estado, devuelve false si no se pudo
+    public boolean cargarBoleto(int numero, String nombre, String documento, int horario, String codigoSilla, boolean activo) {
+        if (cantidadBoletos == boletos.length) {
+            return false;
+        }
+        Funcion funcion = buscarFuncion(horario);
+        if (funcion == null) {
+            return false;
+        }
+        Silla silla = funcion.buscarSilla(codigoSilla);
+        if (silla == null) {
+            return false;
+        }
+        if (activo) {
+            if (silla.estaOcupada()) {
+                return false;
+            }
+            silla.ocupar();
+        }
+
+        Boleto boleto = new Boleto(numero, new Cliente(nombre, documento), funcion, silla, silla.calcularPrecio());
+        if (!activo) {
+            boleto.cancelar();
+        }
+        boletos[cantidadBoletos] = boleto;
+        cantidadBoletos++;
+
+        // El siguiente numero debe quedar despues del mayor numero cargado
+        if (numero >= siguienteNumero) {
+            siguienteNumero = numero + 1;
+        }
+        return true;
     }
 
     // Cancela una boleta activa y libera su silla

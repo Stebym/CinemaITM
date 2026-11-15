@@ -13,3 +13,6 @@ nbactions.xml
 *.pem
 credenciales*
 secrets*
+
+# Archivo de datos que genera el programa al guardar
+cine_datos.txt

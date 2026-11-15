@@ -1,0 +1,15 @@
+# Archivos compilados que NetBeans genera solo
+target/
+*.class
+
+# Configuracion local de NetBeans
+nbproject/private/
+nbactions.xml
+
+# Archivos de claves y datos privados, nunca se suben
+.env
+.env.*
+*.key
+*.pem
+credenciales*
+secrets*

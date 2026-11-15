@@ -2,8 +2,9 @@ package com.itm.cine;
 
 import com.itm.cine.modelo.Cine;
 import com.itm.cine.modelo.Pelicula;
+import com.itm.cine.vista.VentanaCine;
 
-// Punto de entrada del programa: crea el cine con datos de prueba
+// Punto de entrada del programa: crea el cine con datos de prueba y abre la ventana
 public class Principal {
 
     // Crea el cine con tres funciones y algunas boletas ya vendidas para probar de una vez
@@ -27,8 +28,10 @@ public class Principal {
         return cine;
     }
 
-    // Por ahora arranca el menu de consola
+    // Arranca el programa con la ventana grafica
     public static void main(String[] args) {
-        MenuConsola.main(args);
+        Cine cine = crearCineConDatos();
+        VentanaCine ventana = new VentanaCine(cine);
+        ventana.setVisible(true);
     }
 }

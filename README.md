@@ -4,6 +4,8 @@ Proyecto final de Logica de programacion y laboratorio, ITM 2026-2, grupo 27.
 Docente: Sebastian Montoya Villada.
 Estudiante: Jimmy Stebym Rosero Barrera (trabajo individual).
 
+![Ventana principal de Cinema ITM](docs/ventana.png)
+
 ## Enunciado del problema
 
 Un cine tiene una sola sala con 24 sillas organizadas en 4 filas (A, B, C y D) de 6 sillas
@@ -167,10 +169,16 @@ classDiagram
         +quitarFuncion(int) String
         +venderBoleto(int, String, String, String) String
         +buscarBoleto(int) Boleto
+        +buscarBoletoActivo(Funcion, Silla) Boleto
+        +cargarBoleto(int, String, String, int, String, boolean) boolean
         +cancelarBoleto(int) String
         +buscarPorDocumento(String) Boleto[]
         +totalRecaudado() double
         +ordenarPorValor() Boleto[]
+    }
+    class ArchivoCine {
+        +guardar(Cine, String)$ String
+        +cargar(String)$ Cine
     }
 
     Silla <|-- SillaVip : herencia
@@ -181,7 +189,14 @@ classDiagram
     Boleto "0..*" --> "1" Cliente : comprador
     Boleto "0..*" --> "1" Funcion
     Boleto "0..1" --> "1" Silla
+    ArchivoCine ..> Cine : guarda y carga
 ```
+
+Las clases de la interfaz no son parte del modelo y solo usan a Cine:
+
+- `Principal`: crea el cine con los datos precargados y abre la ventana.
+- `VentanaCine` (Swing): muestra la cartelera, el mapa de sillas y los botones de cada opcion.
+- `MenuConsola`: menu de respaldo en la terminal con do-while y switch.
 
 ### Relaciones
 
@@ -194,9 +209,65 @@ classDiagram
 - Asociacion: una funcion proyecta una pelicula, y cada boleto conoce a su cliente, su
   funcion y su silla.
 
+## Como ejecutar
+
+1. Se necesita Java 25 o mas nuevo (el programa usa `IO.println`) y NetBeans.
+2. En NetBeans: File, Open Project y se escoge la carpeta `CinemaITM`.
+3. Clic derecho al proyecto, Clean and Build.
+4. Para la ventana grafica: Run Project (F6), o abrir `Principal.java` y Shift + F6.
+5. Para el menu de consola de respaldo: abrir `MenuConsola.java` y Shift + F6.
+
+El programa arranca con datos precargados para probarlo de una vez:
+
+| Funcion | Pelicula | Boletas vendidas |
+| --- | --- | --- |
+| 14:00 | Intensamente 2 | A1, A2 y C3 (VIP) |
+| 17:30 | Dune Parte Dos | D6 (VIP) y B4 |
+| 20:30 | Oppenheimer | C1 (VIP), cancelada |
+
+En la ventana se hace clic en una silla verde o dorada para venderla. Si se hace clic en una
+silla roja, el programa muestra quien la reservo y pregunta si se quiere cancelar.
+
+## Estructura del proyecto
+
+```
+src/main/java/com/itm/cine/
+    Principal.java          punto de entrada, datos precargados
+    MenuConsola.java        menu de consola de respaldo
+    modelo/                 clases del problema y reglas del negocio
+        Pelicula.java, Silla.java, SillaVip.java, Funcion.java,
+        Cliente.java, Boleto.java, Cine.java, ArchivoCine.java
+    vista/
+        VentanaCine.java    interfaz grafica con Swing
+```
+
+## Pruebas
+
+Todas parten de los datos precargados.
+
+| # | Que se prueba | Entrada | Resultado esperado | Tipo |
+| --- | --- | --- | --- | --- |
+| 1 | Venta en zona general | 14:00, silla B3, Ana Gil, 111 | Boleto vendido por $12000, B3 queda roja | Valido |
+| 2 | Venta en zona VIP | 14:00, silla D1, Luis Mora, 222 | Boleto vendido por $15600 | Valido |
+| 3 | Silla ocupada | 14:00, silla A1 | Error: la silla A1 ya esta ocupada en esa funcion | Invalido |
+| 4 | Misma silla en otra funcion | 17:30, silla A1 | Se vende, cada funcion tiene sus sillas | Valido |
+| 5 | Silla que no existe | 14:00, silla Z9 | Error: la silla Z9 no existe en la sala | Invalido |
+| 6 | Datos vacios | 14:00, silla B2, nombre vacio | Error: falta el nombre del cliente | Invalido |
+| 7 | Dos funciones a la misma hora | Agregar funcion a las 1730 | Error: ya hay una funcion a esa hora | Invalido |
+| 8 | Horario invalido | Agregar funcion a las 2575 | Error: el horario 2575 no es una hora valida | Invalido |
+| 9 | Letras donde va un numero | Duracion "abc" en la ventana, o letras en el menu | Mensaje de error, el programa sigue abierto | Invalido |
+| 10 | Quitar funcion con boletas | Quitar la de las 14:00 | Error: la funcion tiene boletas activas | Invalido |
+| 11 | Quitar funcion sin boletas activas | Quitar la de las 20:30 | Funcion quitada | Valido |
+| 12 | Cancelar boleta | Boleta 1001 | Cancelada, la silla A1 queda libre | Valido |
+| 13 | Cancelar dos veces | Boleta 1001 otra vez | Error: la boleta #1001 ya estaba cancelada | Invalido |
+| 14 | Boleta que no existe | Boleta 9999 | Error: no existe la boleta #9999 | Invalido |
+| 15 | Buscar quien reservo | Documento 102030 | Dos boletas de Carlos Gomez (1001 y 1005) | Valido |
+| 16 | Reporte | Datos precargados | Recaudo $67200, la boleta cancelada no suma; 14:00 al 12.5% | Valido |
+| 17 | Archivo | Guardar, quitar una funcion y cargar | La cartelera y las boletas vuelven como estaban | Valido |
+
 ## Avance por semanas
 
 - [x] Semana 1. Propuesta: enunciado, reglas del negocio y requisitos.
 - [x] Semana 2. Diseno: diagrama de clases UML y clases del modelo.
-- [ ] Semana 3. Funcionalidad: requisitos funcionando con sus validaciones.
-- [ ] Semana 4. Cierre: interfaz grafica, pruebas, documento y sustentacion.
+- [x] Semana 3. Funcionalidad: requisitos funcionando con sus validaciones.
+- [x] Semana 4. Cierre: interfaz grafica, pruebas y documento.
